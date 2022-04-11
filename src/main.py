@@ -13,7 +13,6 @@ TELEGRAM_API_ID = os.getenv('TELEGRAM_API_ID')
 TELEGRAM_API_HASH = os.getenv('TELEGRAM_API_HASH')
 
 # @JsonDumpBot ('message' -> 'forward_from_chat' -> 'id')
-# array '["", ""]'
 CHANNELS = list(map(int, json.loads(os.getenv('CHANNELS'))))
 USERS = list(map(int, json.loads(os.getenv('USERS'))))
 
@@ -29,8 +28,14 @@ client = Client(
 @client.on_message()
 async def handler(_, message):
     message_id = message.message_id
-    chat_id = message.chat.id
-    from_user_id = getattr(getattr(message, 'from_user', None), 'id', None)
+    chat = getattr(message, 'chat', None)
+    from_user = getattr(message, 'from_user', None)
+
+    chat_id = getattr(chat, 'id', None)
+    chat_title = getattr(chat, 'title', None)
+
+    from_user_id = getattr(from_user, 'id', None)
+    from_username = getattr(from_user, 'username', None)
 
     try:
         if (chat_id not in CHANNELS):
@@ -43,12 +48,12 @@ async def handler(_, message):
 
         await client.send_reaction(message_id=message_id, chat_id=chat_id, emoji=random_react)
 
-        print_t(f'message (chat_id id: {chat_id}) (from_id {from_user_id}) reacted by {random_react}')
+        print_t(f'chat: {chat_title}({chat_id}) | from: {from_username}({from_user_id}) - reacted by {random_react}')
 
     except Exception as error:
-        print_t(f'error react message (chat_id: {chat_id}) (from_id {from_user_id}). Error {error}')
+        print_t(f'chat: {chat_title}({chat_id}) | from: {from_username}({from_user_id}).\nError {error}')
 
 
 def start():
-    print_t('forwarder started')
+    print_t('react spammer started')
     client.run()

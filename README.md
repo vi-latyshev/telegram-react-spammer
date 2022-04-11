@@ -1,1 +1,1 @@
-telegram-forwarder
+telegram-react-spammer
